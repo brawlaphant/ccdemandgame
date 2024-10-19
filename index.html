@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Credit Trading Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        #game-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1600px;
+            width: 100%;
+        }
+
+        #game, #info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex: 1;
+            max-width: 800px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        #game {
+            margin-right: 20px;
+        }
+
+        h1, h2 {
+            color: #4CAF50;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-top: 0;
+        }
+
+        button {
+            margin: 10px 5px;
+            padding: 12px 24px;
+            font-size: 16px;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            color: #e0e0e0;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.4s;
+        }
+
+        button:hover:before {
+            left: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        #market, #demand {
+            width: 100%;
+            height: 20px;
+            background-color: rgba(76, 175, 80, 0.3);
+            margin: 20px auto;
+            transition: background-color 0.5s;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #marketFill, #demandFill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.5s;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-size: 18px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .value {
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        #message {
+            margin-top: 20px;
+            font-style: italic;
+            min-height: 24px;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .button-group button {
+            flex: 1 1 auto;
+            min-width: 120px;
+        }
+
+        .info-text {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        #current-event {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+
+        /* New styles for the visual element */
+        #visual-element {
+            width: 100%;
+            height: 100px;
+            background: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80') center/cover;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #visual-element::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        #visual-element-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 2;
+            width: 100%;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game">
+            <h1>Carbon Credit Trading</h1>
+            <div id="visual-element">
+                <div id="visual-element-text">Sustainable Future</div>
+            </div>
+            <div class="stat">
+                <span>Market Price:</span>
+                <span class="value">$<span id="price">10</span></span>
+            </div>
+            <div id="market"><div id="marketFill"></div></div>
+            <div class="stat">
+                <span>Demand:</span>
+                <span class="value"><span id="demandValue">50</span>%</span>
+            </div>
+            <div id="demand"><div id="demandFill"></div></div>
+            <div class="stat">
+                <span>Money:</span>
+                <span class="value">$<span id="money">1000</span></span>
+            </div>
+            <div class="stat">
+                <span>Carbon Credits:</span>
+                <span class="value"><span id="credits">0</span></span>
+            </div>
+            <div class="stat">
+                <span>Environmental Impact:</span>
+                <span class="value"><span id="impact">0</span>%</span>
+            </div>
+            <div class="stat">
+                <span>Retired Credits:</span>
+                <span class="value"><span id="retiredCredits">0</span></span>
+            </div>
+            <div class="stat">
+                <span>Industry Retired Credits:</span>
+                <span class="value"><span id="industryRetiredCredits">0</span></span>
+            </div>
+            <div class="button-group">
+                <button onclick="buyCredits(1)">Buy 1</button>
+                <button onclick="buyCredits(5)">Buy 5</button>
+                <button onclick="buyCredits(10)">Buy 10</button>
+            </div>
+            <div class="button-group">
+                <button onclick="sellCredits(1)">Sell 1</button>
+                <button onclick="sellCredits(5)">Sell 5</button>
+                <button onclick="sellCredits(10)">Sell 10</button>
+            </div>
+            <div class="button-group">
+                <button onclick="retireCredits(1)">Retire 1</button>
+                <button onclick="retireCredits(5)">Retire 5</button>
+                <button onclick="retireCredits(10)">Retire 10</button>
+            </div>
+            <p id="message"></p>
+        </div>
+        <div id="info-panel">
+            <h2>Carbon Credit Trading Guide</h2>
+            <div class="info-section">
+                <h3>What are Carbon Credits?</h3>
+                <p>Carbon credits are tradable certificates representing the right to emit one ton of carbon dioxide or equivalent greenhouse gases. By buying and retiring credits, you're supporting projects that reduce emissions, such as renewable energy or reforestation initiatives.</p>
+            </div>
+            <div class="info-section">
+                <h3>Game Mechanics</h3>
+                <ul>
+                    <li><strong>Buying Credits:</strong> Increases your credit count and slightly raises the environmental impact.</li>
+                    <li><strong>Selling Credits:</strong> Converts credits to money and slightly lowers the environmental impact.</li>
+                    <li><strong>Retiring Credits:</strong> Permanently removes credits from circulation, significantly reducing environmental impact.</li>
+                </ul>
+            </div>
+            <div class="info-section">
+                <h3>Factors Affecting Demand</h3>
+                <ul>
+                    <li><strong>Market Fluctuations:</strong> Random events can cause short-term price changes.</li>
+                    <li><strong>Regulations:</strong> Changes in climate policies can affect demand.</li>
+                    <li><strong>Market Sentiment:</strong> Public opinion on climate change influences buying patterns.</li>
+                    <li><strong>Environmental Impact:</strong> Higher impact increases demand for credits.</li>
+                    <li><strong>Credit Retirement:</strong> Retiring credits slightly reduces overall demand.</li>
+                </ul>
+            </div>
+            <div class="info-section">
+                <h3>Strategy Tips</h3>
+                <ul>
+                    <li>Buy credits when prices are low and demand is increasing.</li>
+                    <li>Sell credits when prices peak to maximize profits.</li>
+                    <li>Retire credits strategically to balance profit with environmental responsibility.</li>
+                    <li>Pay attention to current events as they can significantly impact the market.</li>
+                </ul>
+            </div>
+            <div id="current-event">
+                <h3>Current Event:</h3>
+                <p id="event-description"></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        let money = 1000;
+        let credits = 0;
+        let price = 10;
+        let impact = 0;
+        let demand = 50;
+        let retiredCredits = 0;
+        let industryRetiredCredits = 0;
+
+        function updateDisplay() {
+            document.getElementById('money').textContent = money.toFixed(2);
+            document.getElementById('credits').textContent = credits;
+            document.getElementById('price').textContent = price.toFixed(2);
+            document.getElementById('impact').textContent = impact;
+            document.getElementById('marketFill').style.width = `${impact}%`;
+            document.getElementById('demandValue').textContent = Math.round(demand);
+            document.getElementById('demandFill').style.width = `${demand}%`;
+            document.getElementById('retiredCredits').textContent = retiredCredits;
+            document.getElementById('industryRetiredCredits').textContent = industryRetiredCredits;
+        }
+
+        function buyCredits(amount) {
+            const cost = price * amount;
+            if (money >= cost) {
+                money -= cost;
+                credits += amount;
+                impact = Math.min(100, impact + amount * 0.5);
+                document.getElementById('message').textContent = `Bought ${amount} credit(s) for $${cost.toFixed(2)}`;
+                updatePrice();
+            } else {
+                document.getElementById('message').textContent = 'Not enough money!';
+            }
+            updateDisplay();
+        }
+
+        function sellCredits(amount) {
+            if (credits >= amount) {
+                const earnings = price * amount;
+                money += earnings;
+                credits -= amount;
+                impact = Math.max(0, impact - amount * 0.25);
+                document.getElementById('message').textContent = `Sold ${amount} credit(s) for $${earnings.toFixed(2)}`;
+                updatePrice();
+            } else {
+                document.getElementById('message').textContent = 'Not enough credits to sell!';
+            }
+            updateDisplay();
+        }
+
+        function retireCredits(amount) {
+            if (credits >= amount) {
+                credits -= amount;
+                retiredCredits += amount;
+                impact = Math.max(0, impact - amount);
+                document.getElementById('message').textContent = `Retired ${amount} credit(s). Environmental impact reduced!`;
+                updatePrice();
+            } else {
+                document.getElementById('message').textContent = 'Not enough credits to retire!';
+            }
+            updateDisplay();
+        }
+
+        function updatePrice() {
+            const baseChange = (Math.random() - 0.5) * 2;
+            const demandEffect = (demand - 50) / 50; // Demand effect ranges from -1 to 1
+            const impactEffect = (impact - 50) / 100; // Impact effect ranges from -0.5 to 0.5
+            const retirementEffect = retiredCredits * 0.01; // Small positive effect from retiring credits
+            
+            price = Math.max(1, price + baseChange + demandEffect + impactEffect + retirementEffect);
+        }
+
+        function updateDemand() {
+            // Simulate various factors affecting demand
+            const randomFactor = Math.random() * 10 - 5; // Random fluctuation
+            const regulationFactor = Math.sin(Date.now() / 10000) * 10; // Simulates changing regulations
+            const marketSentiment = Math.cos(Date.now() / 15000) * 5; // Simulates market sentiment
+            const impactFactor = (impact / 100) * 10; // Higher impact increases demand
+            const retirementFactor = (retiredCredits / 100) * 5; // Retiring credits slightly reduces demand
+            
+            demand = Math.max(0, Math.min(100, demand + randomFactor + regulationFactor + marketSentiment + impactFactor - retirementFactor));
+        }
+
+        const events = [
+            "New climate policy increases demand for carbon credits.",
+            "Technological breakthrough in renewable energy affects credit prices.",
+            "Major corporation pledges to go carbon neutral, boosting demand.",
+            "Economic downturn reduces industrial emissions, lowering credit demand.",
+            "Extreme weather event raises awareness, increasing credit retirement.",
+            "International agreement sets stricter emission targets, affecting market.",
+            "New carbon capture technology impacts credit valuations.",
+            "Shift in public opinion on climate change influences market sentiment.",
+            "Major forest fire increases focus on reforestation credits.",
+            "Innovative carbon trading platform launches, affecting market dynamics."
+        ];
+
+        function updateEvent() {
+            const eventIndex = Math.floor(Math.random() * events.length);
+            document.getElementById('event-description').textContent = events[eventIndex];
+        }
+
+        function handleIndustryRetirement() {
+            const retirementAmount = Math.floor(Math.random() * 5) + 1;
+            industryRetiredCredits += retirementAmount;
+            demand = Math.max(0, demand - retirementAmount);
+            document.getElementById('message').textContent = `Industry retired ${retirementAmount} credit(s). Market demand decreased.`;
+            updateDisplay();
+        }
+
+        setInterval(() => {
+            updatePrice();
+            updateDemand();
+            updateDisplay();
+            updateEvent();
+            handleIndustryRetirement();
+        }, 10000);
+
+        updateDisplay();
+        updateEvent();
+    </script>
+</body>
+</html>
